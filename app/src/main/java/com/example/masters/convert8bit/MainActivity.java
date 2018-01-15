@@ -73,39 +73,8 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 //                ConvertVeiw.setImageResource(R.drawable.bg);
 //                ConvertVeiw.getDrawable();
-
                 ConvertImage();
                 ConvertVeiw.setImageDrawable(null);
-//                try{
-//
-//                    // Create a bitmap from an asset image
-//                    InputStream is = getAssets().open("fg.bmp");
-//                    Bitmap bitmap = BitmapFactory.decodeStream(is);
-//
-//                    ConvertVeiw.setImageBitmap(bitmap);
-//
-//                    // Initializing a new ByteArrayOutputStream
-//                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//
-//                    // Compress the bitmap to PNG format and 100% image quality
-//                    bitmap.compress(Bitmap.CompressFormat.PNG,100,stream);
-//
-//                    // Create a byte array from ByteArrayOutputStream
-//                    byte[] byteArray = stream.toByteArray();
-//
-//                    // Create a bitmap from the byte array
-//                    Bitmap compressedBitmap = BitmapFactory.decodeByteArray(byteArray,0,byteArray.length);
-//
-//                    // Set the compressed bitmap to second ImageView
-//                    ConvertVeiw.setImageBitmap(compressedBitmap);
-//
-//                    // Notify the user that byte array generated from bitmap
-//                    Toast.makeText(getApplicationContext(), "ByteArray created.",Toast.LENGTH_SHORT).show();
-//
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
             }
         });
     }
@@ -126,20 +95,17 @@ public class MainActivity extends Activity {
     private void SaveImage(Bitmap finalBitmap) {
 
         Toast.makeText(MainActivity.this, "zzzzz", Toast.LENGTH_SHORT).show();
-//        i+=1;
 
 //        //create name in Storage
 //        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES.toString()).toString();
 //        File myDir = new File(root + "/" + "MixFinger455");
 //        myDir.mkdirs();
 
+
         //create name Image
-//        String fname = "Image-" + timeStamp + "-" +Integer.valueOf(i) + ".jpg";
-//        String fname = "AAAA.bmp";
         drawable = getResources().getDrawable(R.drawable.fp);
         bitmap = ((BitmapDrawable)drawable).getBitmap();
         String fname = " ";
-//        fname = finalBitmap.getHeight()+"_"+ finalBitmap.getWidth() +".bmp";
         fname = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "demo_image", "demo_image");
         URI = Uri.parse(fname);
         Toast.makeText(MainActivity.this, "Image Saved Successfully", Toast.LENGTH_LONG).show();
