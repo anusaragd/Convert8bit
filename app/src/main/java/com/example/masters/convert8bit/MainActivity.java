@@ -2,12 +2,21 @@ package com.example.masters.convert8bit;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -37,6 +46,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static android.os.Environment.DIRECTORY_PICTURES;
+
 public class MainActivity extends Activity {
 
     Button convertButton;
@@ -44,6 +55,12 @@ public class MainActivity extends Activity {
     ImageView BGVeiw;
     ImageView ConvertVeiw;
     TextView text_status;
+    Bitmap bitmapOriginal;
+    Bitmap bitmapScaled;
+
+    String fname ; // ชื่อไฟล์
+    Uri URI;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,113 +88,102 @@ public class MainActivity extends Activity {
         convertButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // create scaled bitmap using Matrix
+                Matrix matrix = new Matrix();
+
+                int Width = 0b110010000 ;
+                int Height = 0b110010000 ;
+
 //                ConvertVeiw.setImageResource(R.drawable.bg);
 //                ConvertVeiw.getDrawable();
-                ConvertImage();
-                ConvertVeiw.setImageDrawable(null);
+//                ConvertImage();
+//                ConvertVeiw.setImageDrawable(null);
+                bitmapOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+                BGVeiw.setImageBitmap(bitmapOriginal);
+
+//                Bitmap bitmapScaled = Bitmap.createBitmap(bitmapOriginal, 0, 0,
+//                        bitmapOriginal.getWidth(), bitmapOriginal.getHeight(), matrix,
+//                        false);
+
+                bitmapScaled = BitmapFactory.decodeResource(getResources(), R.drawable.fp);
+                fingerVeiw.setImageBitmap(bitmapScaled);
+
+
+                //Merge two bitmaps to one
+                Bitmap bitmapMerged = Bitmap.createBitmap(
+                        bitmapOriginal.getWidth(),
+                        bitmapOriginal.getHeight(),
+                        bitmapOriginal.getConfig());
+                Canvas canvasMerged = new Canvas(bitmapMerged);
+                canvasMerged.drawBitmap(bitmapOriginal, 0, 0, null);
+                canvasMerged.drawBitmap(bitmapScaled, 50, 0, null);
+
+                ConvertVeiw.setImageBitmap(bitmapMerged);
+                ConvertVeiw.getDrawable();
+                SaveImage(bitmapMerged);
             }
         });
     }
 
-    Bitmap bitmap;
-    Uri URI;
-    Drawable drawable;
 
-    private void ConvertImage() {
-        fingerVeiw.setImageResource(R.drawable.fp);
-        BGVeiw.setImageResource(R.drawable.bg);
-//        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-//                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-        ConvertVeiw.setImageBitmap(bitmap);
+
+
+//
+//    private void ConvertImage() {
+//        fingerVeiw.setImageResource(R.drawable.fp);
+//        BGVeiw.setImageResource(R.drawable.bg);
+////        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+////                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+//        ConvertVeiw.setImageBitmap(bitmap);
 //        SaveImage();
-        SaveImage(bitmap);
-    }
+//        SaveImage(bitmap);
+//    }
+
     private void SaveImage(Bitmap finalBitmap) {
 
-        Toast.makeText(MainActivity.this, "zzzzz", Toast.LENGTH_SHORT).show();
-
-//        //create name in Storage
-//        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES.toString()).toString();
-//        File myDir = new File(root + "/" + "MixFinger455");
-//        myDir.mkdirs();
+        //get bitmap from ImageVIew
+        //not always valid, depends on your drawable
+        Bitmap bitmap = ((BitmapDrawable)ConvertVeiw.getDrawable()).getBitmap();
 
 
-        //create name Image
-        drawable = getResources().getDrawable(R.drawable.fp);
-        bitmap = ((BitmapDrawable)drawable).getBitmap();
-        String fname = " ";
-        fname = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "demo_image", "demo_image");
-        URI = Uri.parse(fname);
-        Toast.makeText(MainActivity.this, "Image Saved Successfully", Toast.LENGTH_LONG).show();
-//        File file = new File(myDir, fname );
-//        if (file.exists())
-//            file.delete();
-//        try {
-//
-////            FileOutputStream out = new FileOutputStream(file);
-////            MyBitmapFile fileBMP1 = new MyBitmapFile(256, 360, mImageFP);
-////            finalBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-////            out.write(fileBMP1.toBytes());
-////            out.close();
-////
-////
-////            String fileName = "AAAA.bmp";
-////            File dir= Environment.getExternalStoragePublicDirectory(root + "/" + "MixFinger111.4");
-////            File path = new File(dir, fileName);
-////            String s = path.toString();
-////            File file1 = new File(s);
-////            int size = (int) file1.length();
-////            byte[] bytes1 = new byte[size];
-////
-////
-////            // 1. bmp to byte array  =  CORRECT METHODE
-////            try {
-////                BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-////                buf.read(bytes1, 0, bytes1.length);
-////                buf.close();
-////            } catch (FileNotFoundException e) {
-////                // TODO Auto-generated catch block
-////                e.printStackTrace();
-////            } catch (IOException e) {
-////                // TODO Auto-generated catch block
-////                e.printStackTrace();
-////            }
-//            FileOutputStream out = new FileOutputStream(file);
-//            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-//            out.flush();
-//            out.close();
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//
-//        }
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-//            final Uri contentUri = Uri.fromFile(myDir);
-//            scanIntent.setData(contentUri);
-//            sendBroadcast(scanIntent);
-//        } else {
-//            final Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory()));
-//            sendBroadcast(intent);
-//        }
-//
-//        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-//                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+        //always save as
+//        String fileName = "AAAA.jpg";
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//        bitmap.setWidth(0b110010000);
+//        bitmap.setHeight(0b110010000);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
+
+
+//        File ExternalStorageDirectory = Environment.getExternalStorageDirectory();
+//        File file = new File(ExternalStorageDirectory + File.separator + fileName);
+        File file = new File(MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "demo_image", "demo_image"));
+
+        FileOutputStream fileOutputStream = null;
+        try {
+            file.createNewFile();
+            fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(bytes.toByteArray());
+
+            Toast.makeText(MainActivity.this,
+                    file.getAbsolutePath(),
+                    Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            if(fileOutputStream != null){
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
 
     }
 
-//    Drawable drawable;
-//    Bitmap bitmap;
-//    String ImagePath;
-//    Uri URI;
-//
-//    private void SaveImage(){
-//        drawable = getResources().getDrawable(R.drawable.fp);
-//        bitmap = ((BitmapDrawable)drawable).getBitmap();
-//        ImagePath = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "demo_image", "demo_image");
-//        URI = Uri.parse(ImagePath);
-//        Toast.makeText(MainActivity.this, "Image Saved Successfully", Toast.LENGTH_LONG).show();
-//
-//    }
 }
