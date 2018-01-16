@@ -11,6 +11,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -121,6 +123,7 @@ public class MainActivity extends Activity {
 //                ConvertVeiw.setImageBitmap(Bitmap.createScaledBitmap(bitmapMerged, 120, 120, false));
 //                getResizedBitmap(bitmapMerged, 400,400);
                 bitmapMerged = getResizedBitmap(bitmapMerged,400,400);
+//                bitmapMerged = toGrayscale(bitmapMerged);
                 ConvertVeiw.setImageBitmap(bitmapMerged);
                 ConvertVeiw.getDrawable();
                 SaveImage(bitmapMerged);
@@ -154,6 +157,23 @@ public class MainActivity extends Activity {
 
     }
 
+    public Bitmap toGrayscale(Bitmap bmpOriginal)
+    {
+        int width, height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+
+        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpGrayscale);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0);
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        return bmpGrayscale;
+    }
+
 
 //
 //    private void ConvertImage() {
@@ -179,8 +199,8 @@ public class MainActivity extends Activity {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 //        bitmap.setWidth(0b110010000);
 //        bitmap.setHeight(0b110010000);
-
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
+//        bitmap = toGrayscale(bitmap);
 
 
 //        File ExternalStorageDirectory = Environment.getExternalStorageDirectory();
