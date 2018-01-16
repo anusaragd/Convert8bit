@@ -75,6 +75,7 @@ public class MainActivity extends Activity {
 
         ConvertVeiw = (ImageView)findViewById(R.id.imageView_convert);
 
+
         text_status = (TextView)findViewById(R.id.textView_status);
 //                if(convertButton == null){
 //                    text_status.setText("AGREE !!");
@@ -117,7 +118,9 @@ public class MainActivity extends Activity {
                 Canvas canvasMerged = new Canvas(bitmapMerged);
                 canvasMerged.drawBitmap(bitmapOriginal, 0, 0, null);
                 canvasMerged.drawBitmap(bitmapScaled, 50, 0, null);
-
+//                ConvertVeiw.setImageBitmap(Bitmap.createScaledBitmap(bitmapMerged, 120, 120, false));
+//                getResizedBitmap(bitmapMerged, 400,400);
+                bitmapMerged = getResizedBitmap(bitmapMerged,400,400);
                 ConvertVeiw.setImageBitmap(bitmapMerged);
                 ConvertVeiw.getDrawable();
                 SaveImage(bitmapMerged);
@@ -125,7 +128,31 @@ public class MainActivity extends Activity {
         });
     }
 
+    public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
 
+        int width = bm.getWidth();
+
+        int height = bm.getHeight();
+
+        float scaleWidth = ((float) newWidth) / width;
+
+        float scaleHeight = ((float) newHeight) / height;
+
+// CREATE A MATRIX FOR THE MANIPULATION
+
+        Matrix matrix = new Matrix();
+
+// RESIZE THE BIT MAP
+
+        matrix.postScale(scaleWidth, scaleHeight);
+
+// RECREATE THE NEW BITMAP
+
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+
+        return resizedBitmap;
+
+    }
 
 
 //
@@ -152,6 +179,7 @@ public class MainActivity extends Activity {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 //        bitmap.setWidth(0b110010000);
 //        bitmap.setHeight(0b110010000);
+
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
 
 
@@ -165,9 +193,7 @@ public class MainActivity extends Activity {
             fileOutputStream = new FileOutputStream(file);
             fileOutputStream.write(bytes.toByteArray());
 
-            Toast.makeText(MainActivity.this,
-                    file.getAbsolutePath(),
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, file.getAbsolutePath(), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
