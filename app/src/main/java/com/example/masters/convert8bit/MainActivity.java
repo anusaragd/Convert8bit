@@ -15,6 +15,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -92,21 +93,12 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 // create scaled bitmap using Matrix
-                Matrix matrix = new Matrix();
+//                Matrix matrix = new Matrix();
 
-                int Width = 0b110010000 ;
-                int Height = 0b110010000 ;
-
-//                ConvertVeiw.setImageResource(R.drawable.bg);
-//                ConvertVeiw.getDrawable();
-//                ConvertImage();
-//                ConvertVeiw.setImageDrawable(null);
+//                int Width = 0b110010000 ;
+//                int Height = 0b110010000 ;
                 bitmapOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
                 BGVeiw.setImageBitmap(bitmapOriginal);
-
-//                Bitmap bitmapScaled = Bitmap.createBitmap(bitmapOriginal, 0, 0,
-//                        bitmapOriginal.getWidth(), bitmapOriginal.getHeight(), matrix,
-//                        false);
 
                 bitmapScaled = BitmapFactory.decodeResource(getResources(), R.drawable.fp);
                 fingerVeiw.setImageBitmap(bitmapScaled);
@@ -120,50 +112,62 @@ public class MainActivity extends Activity {
                 Canvas canvasMerged = new Canvas(bitmapMerged);
                 canvasMerged.drawBitmap(bitmapOriginal, 0, 0, null);
                 canvasMerged.drawBitmap(bitmapScaled, 50, 0, null);
-//                ConvertVeiw.setImageBitmap(Bitmap.createScaledBitmap(bitmapMerged, 120, 120, false));
-//                getResizedBitmap(bitmapMerged, 400,400);
                 bitmapMerged = getResizedBitmap(bitmapMerged,400,400);
 //                bitmapMerged = toGrayscale(bitmapMerged);
+                bitmapMerged = Bitmap.createBitmap(bitmapMerged.getHeight(),bitmapMerged.getWidth(), Bitmap.Config.RGB_565);
+
+
                 ConvertVeiw.setImageBitmap(bitmapMerged);
                 ConvertVeiw.getDrawable();
-                SaveImage(bitmapMerged);
+                SaveImage();
             }
         });
     }
-
-    public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
-
-        int width = bm.getWidth();
-
-        int height = bm.getHeight();
-
-        float scaleWidth = ((float) newWidth) / width;
-
-        float scaleHeight = ((float) newHeight) / height;
-
-// CREATE A MATRIX FOR THE MANIPULATION
-
-        Matrix matrix = new Matrix();
-
-// RESIZE THE BIT MAP
-
-        matrix.postScale(scaleWidth, scaleHeight);
-
-// RECREATE THE NEW BITMAP
-
-        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
-
-        return resizedBitmap;
-
+    public class GrayscaleFilter {
+        private BufferedImage colorFrame;
+        private BufferedImage grayFrame =
+                new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
     }
 
+    protected void filter() {
+        WritableRaster raster = grayFrame.getRaster();
+
+        for(int x = 0; x < raster.getWidth(); x++) {
+            for(int y = 0; y < raster.getHeight(); y++){
+                int argb = colorFrame.getRGB(x,y);
+                int r = (argb >> 16) & 0xff;
+                int g = (argb >>  8) & 0xff;
+                int b = (argb      ) & 0xff;
+
+                int l = (int) (.299 * r + .587 * g + .114 * b);
+                raster.setSample(x, y, 0, l);
+            }
+        }
+    }
+
+
+    public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+        // RECREATE THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+        return resizedBitmap;
+    }
     public Bitmap toGrayscale(Bitmap bmpOriginal)
     {
+
+
         int width, height;
         height = bmpOriginal.getHeight();
         width = bmpOriginal.getWidth();
+        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 
-        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(bmpGrayscale);
         Paint paint = new Paint();
         ColorMatrix cm = new ColorMatrix();
@@ -186,33 +190,24 @@ public class MainActivity extends Activity {
 //        SaveImage(bitmap);
 //    }
 
-    private void SaveImage(Bitmap finalBitmap) {
-
+    private void SaveImage() {
         //get bitmap from ImageVIew
         //not always valid, depends on your drawable
         Bitmap bitmap = ((BitmapDrawable)ConvertVeiw.getDrawable()).getBitmap();
-
-
         //always save as
 //        String fileName = "AAAA.jpg";
-
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-//        bitmap.setWidth(0b110010000);
-//        bitmap.setHeight(0b110010000);
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
+//        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
 //        bitmap = toGrayscale(bitmap);
-
 
 //        File ExternalStorageDirectory = Environment.getExternalStorageDirectory();
 //        File file = new File(ExternalStorageDirectory + File.separator + fileName);
         File file = new File(MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "demo_image", "demo_image"));
-
         FileOutputStream fileOutputStream = null;
         try {
             file.createNewFile();
             fileOutputStream = new FileOutputStream(file);
             fileOutputStream.write(bytes.toByteArray());
-
             Toast.makeText(MainActivity.this, file.getAbsolutePath(), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -227,9 +222,5 @@ public class MainActivity extends Activity {
                 }
             }
         }
-
-
-
     }
-
 }
