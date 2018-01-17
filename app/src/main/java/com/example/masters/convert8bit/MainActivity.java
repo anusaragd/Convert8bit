@@ -116,8 +116,10 @@ public class MainActivity extends Activity {
 //                bitmapMerged = toGrayscale(bitmapMerged);
                 bitmapMerged = Bitmap.createBitmap(bitmapMerged.getHeight(),bitmapMerged.getWidth(), Bitmap.Config.RGB_565);
 
+                int color = 77 + 151 + 28 ;
 
                 ConvertVeiw.setImageBitmap(bitmapMerged);
+                ConvertVeiw.setColorFilter(color);
                 ConvertVeiw.getDrawable();
                 SaveImage();
             }
