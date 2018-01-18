@@ -2,10 +2,12 @@ package com.example.masters.convert8bit;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -37,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -112,40 +115,46 @@ public class MainActivity extends Activity {
                 Canvas canvasMerged = new Canvas(bitmapMerged);
                 canvasMerged.drawBitmap(bitmapOriginal, 0, 0, null);
                 canvasMerged.drawBitmap(bitmapScaled, 50, 0, null);
+
+                bitmapMerged = toGrayscale(bitmapMerged);
+//                int encodedData = (Math.floor((red / 32)) << 5) + (Math.floor((green / 32)) << 2) + Math.floor((blue / 64));
                 bitmapMerged = getResizedBitmap(bitmapMerged,400,400);
 //                bitmapMerged = toGrayscale(bitmapMerged);
-                bitmapMerged = Bitmap.createBitmap(bitmapMerged.getHeight(),bitmapMerged.getWidth(), Bitmap.Config.RGB_565);
 
-                int color = 77 + 151 + 28 ;
+//                int color = 77 + 151 + 28 ;
 
                 ConvertVeiw.setImageBitmap(bitmapMerged);
-                ConvertVeiw.setColorFilter(color);
+//                ConvertVeiw.setColorFilter(0xcccccc);
+
+//                ConvertVeiw.setBackgroundColor(0xcccccc);
                 ConvertVeiw.getDrawable();
+//                ShowBitmap();
                 SaveImage();
             }
         });
     }
-    public class GrayscaleFilter {
-        private BufferedImage colorFrame;
-        private BufferedImage grayFrame =
-                new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
-    }
+//    public class GrayscaleFilter {
+//        private BufferedImage colorFrame;
+//        private BufferedImage grayFrame =
+//                new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+//    }
+//
+//    protected void filter() {
+//        WritableRaster raster = grayFrame.getRaster();
+//
+//        for(int x = 0; x < raster.getWidth(); x++) {
+//            for(int y = 0; y < raster.getHeight(); y++){
+//                int argb = colorFrame.getRGB(x,y);
+//                int r = (argb >> 16) & 0xff;
+//                int g = (argb >>  8) & 0xff;
+//                int b = (argb      ) & 0xff;
+//
+//                int l = (int) (.299 * r + .587 * g + .114 * b);
+//                raster.setSample(x, y, 0, l);
+//            }
+//        }
+//    }
 
-    protected void filter() {
-        WritableRaster raster = grayFrame.getRaster();
-
-        for(int x = 0; x < raster.getWidth(); x++) {
-            for(int y = 0; y < raster.getHeight(); y++){
-                int argb = colorFrame.getRGB(x,y);
-                int r = (argb >> 16) & 0xff;
-                int g = (argb >>  8) & 0xff;
-                int b = (argb      ) & 0xff;
-
-                int l = (int) (.299 * r + .587 * g + .114 * b);
-                raster.setSample(x, y, 0, l);
-            }
-        }
-    }
 
 
     public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
@@ -163,8 +172,6 @@ public class MainActivity extends Activity {
     }
     public Bitmap toGrayscale(Bitmap bmpOriginal)
     {
-
-
         int width, height;
         height = bmpOriginal.getHeight();
         width = bmpOriginal.getWidth();
@@ -172,6 +179,7 @@ public class MainActivity extends Activity {
 
         Canvas c = new Canvas(bmpGrayscale);
         Paint paint = new Paint();
+        paint.setColor(0xcccccc);
         ColorMatrix cm = new ColorMatrix();
         cm.setSaturation(0);
         ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
@@ -181,16 +189,34 @@ public class MainActivity extends Activity {
     }
 
 
-//
-//    private void ConvertImage() {
-//        fingerVeiw.setImageResource(R.drawable.fp);
-//        BGVeiw.setImageResource(R.drawable.bg);
-////        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-////                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-//        ConvertVeiw.setImageBitmap(bitmap);
-//        SaveImage();
-//        SaveImage(bitmap);
-//    }
+
+
+
+public static byte[] mImageFP = new byte[153602];
+    private static Bitmap mBitmapFP;
+    private void ShowBitmap()
+    {
+        int[] pixels = new int[153600];
+        for( int i=0; i<153600; i++)
+            pixels[i] = mImageFP[i];
+        Bitmap emptyBmp = Bitmap.createBitmap(pixels, 320, 480, Bitmap.Config.RGB_565);
+
+        int width, height;
+        height = emptyBmp.getHeight();
+        width = emptyBmp.getWidth();
+
+        mBitmapFP = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        Canvas c = new Canvas(mBitmapFP);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0);
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(emptyBmp, 0, 0, paint);
+
+        ConvertVeiw.setImageBitmap(mBitmapFP);
+    }
+
 
     private void SaveImage() {
         //get bitmap from ImageVIew
@@ -201,6 +227,8 @@ public class MainActivity extends Activity {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 //        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
 //        bitmap = toGrayscale(bitmap);
+//        MyBitmapFile fileBMP = new MyBitmapFile(320, 480, mImageFP);
+//        out.write(fileBMP.toBytes());
 
 //        File ExternalStorageDirectory = Environment.getExternalStorageDirectory();
 //        File file = new File(ExternalStorageDirectory + File.separator + fileName);
